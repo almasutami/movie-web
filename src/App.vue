@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import icon from './assets/logo.jpg'
 import noprofile from './assets/noprofile.jpg'
 
 //check width of screen
 const width = screen.width
-// const deviceWidth = screen.width
-// var DPR = window.devicePixelRatio
-// const width = Math.round(DPR * deviceWidth)
+
 const IMG_API_BACKDROP = 'https://image.tmdb.org/t/p/w1280/'
 const IMG_API_POSTER = 'https://image.tmdb.org/t/p/w500/'
 
