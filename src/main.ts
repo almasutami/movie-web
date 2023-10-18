@@ -8,8 +8,8 @@ import router from './router'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faStar } from '@fortawesome/free-solid-svg-icons'
-library.add(faStar)
+import { faStar, faStarHalfStroke, faStarHalf } from '@fortawesome/free-solid-svg-icons'
+library.add(faStar, faStarHalfStroke, faStarHalf)
 
 const app = createApp(App)
 
