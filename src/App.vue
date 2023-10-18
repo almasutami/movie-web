@@ -34,6 +34,7 @@ const fetchMovieList = async () => {
   loading.value = true
 
   allMovie.value = []
+  movieList.value = []
 
   let url = 'https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1'
   switch (listType.value) {
@@ -112,10 +113,36 @@ onUnmounted(() => {
         <h2 style="font-weight: bolder; font-style: oblique" v-if="width > 800">Movie Website</h2>
       </div>
 
-      <div style="display: flex; flex-direction: row; gap: 2rem; align-items: center">
-        <p @click="changeListType('playing')" class="toolbar-link">Now Playing</p>
-        <p @click="changeListType('popular')" class="toolbar-link">Popular</p>
-        <p @click="changeListType('top')" class="toolbar-link">Top Rated</p>
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          gap: 2rem;
+          align-items: center;
+          color: rgb(143, 143, 143);
+        "
+      >
+        <p
+          @click="changeListType('playing')"
+          :class="listType === 'playing' ? 'selected-type' : ''"
+          class="toolbar-link"
+        >
+          Now Playing
+        </p>
+        <p
+          @click="changeListType('popular')"
+          :class="listType === 'popular' ? 'selected-type' : ''"
+          class="toolbar-link"
+        >
+          Popular
+        </p>
+        <p
+          @click="changeListType('top')"
+          :class="listType === 'top' ? 'selected-type' : ''"
+          class="toolbar-link"
+        >
+          Top Rated
+        </p>
         <button @click="fetchMovieList()" class="refresh-button">Refresh</button>
       </div>
 
@@ -265,6 +292,12 @@ onUnmounted(() => {
   -ms-transform: scaleX(-1);
 }
 
+.selected-type {
+  color: white;
+  /* font-weight: bolder; */
+  /* text-decoration: underline; */
+}
+
 .refresh-button {
   border-radius: 5px;
   padding: 5px 12px;
@@ -276,7 +309,6 @@ onUnmounted(() => {
 .refresh-button:hover {
   background-color: rgba(70, 70, 70, 1);
   color: white;
-  text-decoration: underline;
 }
 
 .toolbar-link:hover {
