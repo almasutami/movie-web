@@ -61,7 +61,7 @@ const fetchMovieList = async () => {
   const responseJSON = await response.json()
   allMovie.value = responseJSON.results
 
-  initMovieList()
+  setMovieList()
 
   loading.value = false
 }
@@ -81,16 +81,18 @@ const countRating = computed(() => {
   return Math.round(allMovie.value[0]?.vote_average)
 })
 
-const initMovieList = () => {
-  movieList.value = allMovie.value.slice(1, Math.floor((width - 100 * 2) / 205) + 1)
-}
-
 const movieList = ref<Movie[]>([])
 
 const setMovieList = () => {
   const currentWidth = screen.width
   movieList.value = []
-  movieList.value = allMovie.value.slice(1, Math.floor((currentWidth - 100 * 2) / 205) + 1)
+  if (width > 800) {
+    movieList.value = allMovie.value.slice(1, Math.floor((currentWidth - 100 * 2) / 205) + 1)
+  } else if (width > 500) {
+    movieList.value = allMovie.value.slice(1, Math.floor((currentWidth - 80 * 2) / 155) + 1)
+  } else {
+    movieList.value = allMovie.value.slice(1, Math.floor((currentWidth - 30 * 2) / 105) + 1)
+  }
 }
 
 onMounted(() => {
@@ -101,6 +103,18 @@ onUnmounted(() => {
   window.removeEventListener('resize', setMovieList)
   setMovieList()
 })
+
+const calculateFontParagraph = () => {
+  if (width > 1000) {
+    return '14px'
+  } else if (width > 800) {
+    return '13px'
+  } else if (width > 600) {
+    return '12px'
+  } else {
+    return '10px'
+  }
+}
 </script>
 
 <template>
@@ -119,11 +133,13 @@ onUnmounted(() => {
           align-items: center;
           color: rgb(143, 143, 143);
         "
+        v-if="width > 700"
       >
         <p
           @click="changeListType('playing')"
           :class="listType === 'playing' ? 'selected-type' : ''"
           class="toolbar-link"
+          :style="`font-size: ${calculateFontParagraph()}`"
         >
           Now Playing
         </p>
@@ -131,6 +147,7 @@ onUnmounted(() => {
           @click="changeListType('popular')"
           :class="listType === 'popular' ? 'selected-type' : ''"
           class="toolbar-link"
+          :style="`font-size: ${calculateFontParagraph()}`"
         >
           Popular
         </p>
@@ -138,13 +155,28 @@ onUnmounted(() => {
           @click="changeListType('top')"
           :class="listType === 'top' ? 'selected-type' : ''"
           class="toolbar-link"
+          :style="`font-size: ${calculateFontParagraph()}`"
         >
           Top Rated
         </p>
         <button @click="fetchMovieList()" class="refresh-button">Refresh</button>
       </div>
 
-      <div style="padding: 30px">
+      <div v-else>
+        <select
+          style="padding: 10px 20px; border-radius: 10px"
+          name="type"
+          id="type"
+          v-model="listType"
+          @change="fetchMovieList()"
+        >
+          <option value="playing">Now Playing</option>
+          <option value="popular">Popular</option>
+          <option value="top">Top Rated</option>
+        </select>
+      </div>
+
+      <div :style="width > 800 ? 'padding: 30px' : 'padding: 10px'">
         <img
           :src="noprofile"
           alt="logo"
@@ -154,29 +186,50 @@ onUnmounted(() => {
     </div>
     <div
       class="featured"
-      :style="`background-image: linear-gradient(to right, rgba(30,30,30,1), rgba(30,30,30,0)), url(${
-        IMG_API_BACKDROP + allMovie[0]?.backdrop_path
-      })`"
+      :style="
+        `background-image: linear-gradient(to right, rgba(30,30,30,1), rgba(30,30,30,0)), url(${
+          IMG_API_BACKDROP + allMovie[0]?.backdrop_path
+        });` +
+        `${
+          width > 800
+            ? 'padding: 100px 100px'
+            : width > 500
+            ? 'padding: 80px 80px'
+            : 'padding: 30px 30px'
+        }`
+      "
     >
-      <div v-if="!loading" class="featured-content">
-        <h1 style="font-weight: bolder; font-size: 42px">
+      <div
+        v-if="!loading"
+        class="featured-content"
+        :style="width > 800 ? 'width: 50%' : width > 600 ? 'width: 80%' : 'width: 100%'"
+      >
+        <h1
+          style="font-weight: bolder"
+          :style="`${
+            width > 800 ? 'font-size: 42px' : width > 500 ? 'font-size: 36px' : 'font-size: 28px'
+          }`"
+        >
           {{ allMovie[0]?.title }} ({{ allMovie[0]?.release_date?.slice(0, 4) }})
         </h1>
-        <div style="width: 80%; display: flex; flex-direction: column; gap: 8px">
-          <p style="font-size: 14px">{{ allMovie[0]?.overview }}</p>
+        <div
+          style="display: flex; flex-direction: column; gap: 8px"
+          :style="width > 800 ? 'width: 80%' : 'width: 100%'"
+        >
+          <p :style="`font-size: ${calculateFontParagraph()}`">{{ allMovie[0]?.overview }}</p>
 
           <div
-            style="
-              display: flex;
-              flex-direction: row;
-              font-size: 12px;
-              gap: 1rem;
-              align-items: center;
-            "
+            style="display: flex; flex-direction: row; gap: 1rem; align-items: center"
+            :style="`${
+              width > 800 ? 'font-size: 12px' : width > 500 ? 'font-size: 11px' : 'font-size: 10px'
+            }`"
           >
             <div>TMDB Rating</div>
             <div>{{ allMovie[0]?.vote_average?.toFixed(2) }} / 10</div>
-            <div style="display: flex; flex-direction: row; gap: 1px; align-items: center">
+            <div
+              v-if="width > 320"
+              style="display: flex; flex-direction: row; gap: 1px; align-items: center"
+            >
               <div
                 v-for="(n, i) in 5"
                 :key="i"
@@ -203,6 +256,35 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+          <div
+            v-if="width <= 320"
+            style="display: flex; flex-direction: row; gap: 1px; align-items: center"
+          >
+            <div
+              v-for="(n, i) in 5"
+              :key="i"
+              style="display: flex; flex-direction: row; gap: 1px; align-items: center"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-star-half"
+                style="height: 17px; width: 17px; padding: 0"
+                v-if="countRating / 2 >= n - 0.5 && countRating / 2 < n"
+                class="checked"
+              />
+              <font-awesome-icon
+                icon="fa-solid fa-star-half"
+                style="height: 17px; width: 17px"
+                v-if="countRating / 2 >= n - 0.5 && countRating / 2 < n"
+                class="half-unchecked"
+              />
+              <font-awesome-icon
+                icon="fa-solid fa-star"
+                style="height: 16px; width: 16px"
+                v-else
+                :class="countRating / 2 >= n ? 'checked' : 'unchecked'"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div v-else-if="loading" class="featured-content-loader">
@@ -211,14 +293,23 @@ onUnmounted(() => {
       </div>
 
       <!-- movie list  -->
-      <div class="movie-list">
+      <div v-if="!loading" class="movie-list">
         <div style="align-self: flex-end">More movies ></div>
         <div style="display: flex; flex-direction: row; justify-content: space-between">
           <!-- movie list card -->
           <div v-for="(movie, i) in movieList" :key="i">
             <div
               class="movie-list-card"
-              :style="`background-image: url(${IMG_API_POSTER + movie?.poster_path})`"
+              :style="
+                `background-image: url(${IMG_API_POSTER + movie?.poster_path});` +
+                `${
+                  width > 800
+                    ? 'width: 200px; height: 300px'
+                    : width > 500
+                    ? 'width: 150px; height: 225px'
+                    : 'width: 100px; height: 150px'
+                }`
+              "
             ></div>
           </div>
         </div>
@@ -250,7 +341,6 @@ onUnmounted(() => {
 .featured {
   height: 100%;
   min-height: 90vh;
-  padding: 100px 100px;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
@@ -258,21 +348,12 @@ onUnmounted(() => {
 }
 
 .featured-content {
-  width: 50%;
   height: 100%;
   display: flex;
   color: white;
   flex-direction: column;
   padding: 20px;
   gap: 2rem;
-}
-
-.readmore {
-  text-decoration: none;
-  color: inherit;
-}
-.readmore:hover {
-  text-decoration: underline;
 }
 
 .checked {
@@ -292,8 +373,6 @@ onUnmounted(() => {
 
 .selected-type {
   color: white;
-  /* font-weight: bolder; */
-  /* text-decoration: underline; */
 }
 
 .refresh-button {
@@ -307,10 +386,12 @@ onUnmounted(() => {
 .refresh-button:hover {
   background-color: rgba(70, 70, 70, 1);
   color: white;
+  cursor: pointer;
 }
 
 .toolbar-link:hover {
   text-decoration: underline;
+  cursor: pointer;
 }
 
 .featured-content-loader {
@@ -334,8 +415,6 @@ onUnmounted(() => {
 
 .movie-list-card {
   color: white;
-  width: 200px;
-  height: 300px;
   padding: 10px;
   font-size: 12px;
   background-repeat: no-repeat;
@@ -351,7 +430,7 @@ onUnmounted(() => {
   -o-transform: scale(1.05);
   transform: scale(1.05);
   box-shadow:
-    0 2px 8px 0 rgba(255, 255, 255, 0.5),
-    0 2px 30px 0 rgba(255, 255, 255, 0.5);
+    0 2px 8px 0 rgba(255, 255, 255, 0.3),
+    0 2px 30px 0 rgba(255, 255, 255, 0.3);
 }
 </style>
